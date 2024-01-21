@@ -1,0 +1,6 @@
+services:
+  picochess:
+    build: .
+    network_mode: "host"
+    volumes:
+      - ./picochess.ini:/opt/picochess/picochess.ini
