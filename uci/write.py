@@ -102,7 +102,7 @@ def write_engine_ini(engine_path=None):
     uci_shell = UciShell()
     for engine_file_name in engine_list:
         if is_exe(engine_path + os.sep + engine_file_name):
-            engine = UciEngine(file=engine_path + os.sep + engine_file_name, uci_shell=uci_shell)
+            engine = UciEngine(file=engine_path + os.sep + engine_file_name, uci_shell=uci_shell, mame_par="")
             if engine:
                 print(engine_file_name)
                 try:
