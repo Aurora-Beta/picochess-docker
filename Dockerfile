@@ -3,7 +3,7 @@ FROM    debian:bullseye
 WORKDIR /tmp
 
 RUN     apt update
-RUN     apt install -y git sox unzip wget python3-pip python3-venv libtcl8.6 telnet libglib2.0-dev stockfish
+RUN     apt install -y git sox unzip wget python3-pip python3-venv libtcl8.6 telnet libglib2.0-dev stockfish sudo bluez
 
 WORKDIR /opt
 RUN     python3 -m venv /opt/picochess_venv

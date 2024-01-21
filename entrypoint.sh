@@ -13,10 +13,13 @@ $ACTIVATE_SCRIPT $PICOCHESS_DIR/build/voices.py
 
 # Start
 
+service dbus start
+bluetoothd &
+
 # Create empty log file if none exists
 if [ ! -f logs/picochess.log ]; then
     touch logs/picochess.log
 fi
 
-$ACTIVATE_SCRIPT $PICOCHESS_DIR/picochess.py&
-tail -f logs/picochess.log
+tail -f logs/picochess.log&
+$ACTIVATE_SCRIPT $PICOCHESS_DIR/picochess.py

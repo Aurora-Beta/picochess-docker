@@ -2,5 +2,6 @@ services:
   picochess:
     build: .
     network_mode: "host"
+    privileged: true
     volumes:
       - ./picochess.ini:/opt/picochess/picochess.ini
