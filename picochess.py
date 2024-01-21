@@ -2560,8 +2560,8 @@ def main() -> None:
         "-teng",
         "--tutor-engine",
         type=str,
-        default="/opt/picochess/engines/armv7l/a-stockf",
-        help="engine used for PicoTutor analysis",
+        help="engine used for PicoTutor analysis (required!)",
+        required=True
     )
     parser.add_argument(
         "-watc",
