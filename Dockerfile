@@ -1,23 +1,69 @@
-FROM    debian:bullseye
+# BUILD DGTPICOM
+FROM    debian:bookworm AS BUILD_DGTPICOM_AND_SCIDVSPC
+
+RUN     apt update && apt install -y build-essential tk-dev cmake git
+
+# Build dgtpi
+WORKDIR /compile/dgtpi
+COPY    dgtpi    .
+RUN     make
+
+# Build tcscid
+WORKDIR /compile/scidvspc
+COPY    scidvspc    .
+RUN     ./configure && make
+
+# Build obooksrv
+WORKDIR /compile/obooksrv
+COPY    obooksrv    .
+RUN     cmake . && make && make unittests
+
+# PICOCHESS IMAGE
+FROM    debian:bookworm
 
 WORKDIR /tmp
 
 RUN     apt update
-RUN     apt install -y git sox unzip wget python3-pip python3-venv libtcl8.6 telnet libglib2.0-dev stockfish sudo bluez
+RUN     apt install -y \
+        git sox unzip wget python3-poetry python-is-python3 \
+        libtcl8.6 telnet libglib2.0-dev stockfish \
+        sudo bluez bluetooth procps libcap2-bin
 
-WORKDIR /opt
-RUN     python3 -m venv /opt/picochess_venv
-
+# Setup the virtual environment by poetry
 WORKDIR /opt/picochess
-COPY    .   .
+COPY    poetry.toml pyproject.toml ./
+RUN     poetry install
 
-RUN     ln -sf /opt/picochess/etc/dgtpicom_$(uname -m) /opt/picochess/etc/dgtpicom
-RUN     ln -sf /opt/picochess/etc/dgtpicom.$(uname -m).so /opt/picochess/etc/dgtpicom.so
+# Setup the Image to use the venv created by poetry
+ENV     PATH           /opt/picochess/.venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ENV     POETRY_ACTIVE  1
+ENV     VIRTUAL_ENV    /opt/picochess/.venv
 
-RUN     bash -c "source /opt/picochess_venv/bin/activate && pip3 install wheel && pip3 install --upgrade -r requirements.txt"
-RUN     touch picochess.ini
+# Copy the compiled dgtpip program from the earlier stage
+COPY    --from=BUILD_DGTPICOM_AND_SCIDVSPC /compile/dgtpi/dgtpicom     /opt/picochess/etc/dgtpicom
+COPY    --from=BUILD_DGTPICOM_AND_SCIDVSPC /compile/dgtpi/dgtpicom.so  /opt/picochess/etc/dgtpicom.so
 
-ADD     entrypoint.sh     /
-RUN     chmod +x /entrypoint.sh
+# Copy the compiled tcscid program from the earlier stage
+COPY    --from=BUILD_DGTPICOM_AND_SCIDVSPC /compile/scidvspc/tcscid    /opt/picochess/gamesdb/tcscid
+
+# Copy the compiled tcscid program from the earlier stage
+COPY    --from=BUILD_DGTPICOM_AND_SCIDVSPC /compile/obooksrv/obooksrv  /opt/picochess/obooksrv/
+
+# Copy the rest of the repo
+COPY    . .
+
+# Setup the entrypoint script
+WORKDIR /opt/picochess
+COPY    entrypoint.sh     /
+RUN     chmod +x /entrypoint.sh picochess.py
+
+# MANUALLY PATCHING
+RUN     sed -i "s/class OptionMap(collections.MutableMapping)/class OptionMap(collections.abc.MutableMapping)/g"     /opt/picochess/.venv/lib/python3.11/site-packages/chess/engine.py
+RUN     sed -i "s/import collections/import collections.abc/g"                                                       /opt/picochess/.venv/lib/python3.11/site-packages/chess/engine.py
+RUN     sed -i "s/collections.MutableMapping/collections.abc.MutableMapping/g"                                       /opt/picochess/.venv/lib/python3.11/site-packages/chess/pgn.py
+RUN     sed -i "s/import collections/import collections.abc/g"                                                       /opt/picochess/.venv/lib/python3.11/site-packages/chess/pgn.py
+RUN     sed -i "s/collections.MutableMapping/collections.abc.MutableMapping/g"                                       /opt/picochess/.venv/lib/python3.11/site-packages/tornado/httputil.py
+RUN     sed -i "s/import collections/import collections.abc/g"                                                       /opt/picochess/.venv/lib/python3.11/site-packages/tornado/httputil.py
+
 
 ENTRYPOINT [ "bash", "-c", "/entrypoint.sh" ]

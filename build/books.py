@@ -17,8 +17,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import os
 import configparser
+from pathlib import Path
 
 
 def write_book_ini():
@@ -27,22 +27,27 @@ def write_book_ini():
         """Check for a valid book file name."""
         return fname.endswith('.bin')
 
-    program_path = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
-    books_path = program_path + os.sep + 'books'
-
-    book_list = sorted(os.listdir(books_path))
     config = configparser.ConfigParser()
     config.optionxform = str
-    for book_file_name in book_list:
-        if is_book(book_file_name):
-            print(book_file_name)
-            book = book_file_name[2:-4]
-            config[book_file_name] = {}
-            config[book_file_name]['small'] = book[:6]
-            config[book_file_name]['medium'] = book[:8].title()
-            config[book_file_name]['large'] = book[:11].title()
-    with open(books_path + os.sep + 'books.ini', 'w') as configfile:
-        config.write(configfile)
+
+    program_path = Path().cwd()
+    books_path = Path(f"{program_path}/books")
+    books_ini_path = Path(f"{books_path}/books.ini")
+
+    print("Generating books.ini file now ...")
+
+    for book_file in books_path.glob("*.bin"):
+        book_file_name = book_file.name
+        print(f"-> Found book file with the name '{book_file.name}'")
+        book = book_file_name[2:-4]
+        config[book_file_name] = {}
+        config[book_file_name]['small'] = book[:6]
+        config[book_file_name]['medium'] = book[:8].title()
+        config[book_file_name]['large'] = book[:11].title()
+
+    with open(books_ini_path, "w") as configfile_object:
+        config.write(configfile_object)
+    print(f"{books_ini_path} has been written!")
 
 
 write_book_ini()
