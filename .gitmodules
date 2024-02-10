@@ -4,3 +4,6 @@
 [submodule "scidvspc"]
 	path = scidvspc
 	url = https://github.com/madnight/scidvspc.git
+[submodule "obooksrv"]
+	path = obooksrv
+	url = https://github.com/gkalab/obooksrv.git
