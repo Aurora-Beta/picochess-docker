@@ -47,6 +47,7 @@ cd $PICOCHESS_DIR/obooksrv/
 cd $PICOCHESS_DIR/etc
 ./dgtpicom "  DGT  P|  " 1
 
+
 # Start picochess
 cd $PICOCHESS_DIR
 tail -f logs/picochess.log&

@@ -1,7 +1,7 @@
 # BUILD DGTPICOM
 FROM    debian:bookworm AS COMPILE
 
-RUN     apt update && apt install -y build-essential tk-dev cmake git
+RUN     apt update && apt install -y build-essential tk-dev tcl-dev cmake git
 
 # Build dgtpi
 WORKDIR /compile/dgtpi
@@ -66,6 +66,7 @@ RUN     sed -i "s/collections.MutableMapping/collections.abc.MutableMapping/g"  
 RUN     sed -i "s/import collections/import collections.abc/g"                                                       /opt/picochess/.venv/lib/python3.11/site-packages/chess/pgn.py
 RUN     sed -i "s/collections.MutableMapping/collections.abc.MutableMapping/g"                                       /opt/picochess/.venv/lib/python3.11/site-packages/tornado/httputil.py
 RUN     sed -i "s/import collections/import collections.abc/g"                                                       /opt/picochess/.venv/lib/python3.11/site-packages/tornado/httputil.py
+RUN     setcap 'cap_net_raw,cap_net_admin+eip' /opt/picochess/.venv/lib/python3.11/site-packages/bluepy/bluepy-helper
 
 WORKDIR /opt/picochess/obooksrv
 RUN     ln -s testdata/opening.data .

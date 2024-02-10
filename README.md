@@ -15,6 +15,8 @@ Firstly, you have to clone this repository:
 
 ```sh
 # Clone the repository including the submodules for the first time:
+# Download size is about 500 Megabytes!
+# Size on disk with all submodules is about 1.1GB!
 git clone --recurse-submodules https://github.com/Aurora-Beta/picochess-docker.git
 
 # Update the existing clone of this repo
@@ -75,18 +77,19 @@ if [ ! -f logs/picochess.log ]; then
 fi
 
 
-# Start gamesdb
+# Start gamesdb in the background
 cd $PICOCHESS_DIR/gamesdb
 ./tcscid get_games.tcl --server 7778&
 
-# Start Openingbook Server
+# Start Openingbook Server in the background
 cd $PICOCHESS_DIR/obooksrv/
 ./obooksrv&
 
-# Start dgtpi Service
+# Optionally: Start dgtpi Service
 cd $PICOCHESS_DIR/etc
 ./dgtpicom "  DGT  P|  " 1
 
+# Start picochess in foreground
 $PICOCHESS_DIR/picochess.py
 ```
 

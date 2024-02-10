@@ -1,13 +1,13 @@
 #!/bin/sh
 #
-# Installation script for picochess
+# Installation script for picochess on Raspberry Pi
 #
 
 apt update
 apt full-upgrade -y
 apt install git sox unzip wget python3-pip libtcl8.6 telnet libglib2.0-dev -y
 
-pip3 install --upgrade pip
+pip3 install --upgrade pip poetry wheel
 
 cd /opt
 
