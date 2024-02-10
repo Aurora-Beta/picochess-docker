@@ -11,10 +11,22 @@ Picochess can run on AMD64/x86 and other platforms, that run Python3.11.
 
 ## Installation
 
+Firstly, you have to clone this repository:
+
+```sh
+# Clone the repository including the submodules for the first time:
+git clone --recurse-submodules https://github.com/Aurora-Beta/picochess-docker.git
+
+# Update the existing clone of this repo
+cd <Local path to this cloned repository>
+git pull
+git submodule update --init --recursive
+```
+
 ### Native on Raspberry Pi
 Run this command as root on your Raspberry Pi:
 
-```
+```sh
 curl -sSL https://raw.githubusercontent.com/ghislainbourgeois/picochess/master/install-picochess.sh | bash
 ```
 
@@ -88,7 +100,7 @@ With `docker-compose` or the plugin version `docker compose` installed,
 you can build and use the image as follows:
 
 ```sh
-# Clone the repository including the submodules:
+# Clone the repository including the submodules for the first time:
 git clone --recurse-submodules https://github.com/Aurora-Beta/picochess-docker.git
 
 # Build the image:
