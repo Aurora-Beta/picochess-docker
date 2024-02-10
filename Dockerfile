@@ -1,5 +1,5 @@
 # BUILD DGTPICOM
-FROM    debian:bookworm AS BUILD_DGTPICOM_AND_SCIDVSPC
+FROM    debian:bookworm AS COMPILE
 
 RUN     apt update && apt install -y build-essential tk-dev cmake git
 
@@ -18,7 +18,9 @@ WORKDIR /compile/obooksrv
 COPY    obooksrv    .
 RUN     cmake . && make && make unittests
 
+#
 # PICOCHESS IMAGE
+#
 FROM    debian:bookworm
 
 WORKDIR /tmp
@@ -27,7 +29,7 @@ RUN     apt update
 RUN     apt install -y \
         git sox unzip wget python3-poetry python-is-python3 \
         libtcl8.6 telnet libglib2.0-dev stockfish \
-        sudo bluez bluetooth procps libcap2-bin
+        sudo bluez bluetooth procps libcap2-bin rfkill
 
 # Setup the virtual environment by poetry
 WORKDIR /opt/picochess
@@ -40,14 +42,14 @@ ENV     POETRY_ACTIVE  1
 ENV     VIRTUAL_ENV    /opt/picochess/.venv
 
 # Copy the compiled dgtpip program from the earlier stage
-COPY    --from=BUILD_DGTPICOM_AND_SCIDVSPC /compile/dgtpi/dgtpicom     /opt/picochess/etc/dgtpicom
-COPY    --from=BUILD_DGTPICOM_AND_SCIDVSPC /compile/dgtpi/dgtpicom.so  /opt/picochess/etc/dgtpicom.so
+COPY    --from=COMPILE /compile/dgtpi/dgtpicom     /opt/picochess/etc/dgtpicom
+COPY    --from=COMPILE /compile/dgtpi/dgtpicom.so  /opt/picochess/etc/dgtpicom.so
 
 # Copy the compiled tcscid program from the earlier stage
-COPY    --from=BUILD_DGTPICOM_AND_SCIDVSPC /compile/scidvspc/tcscid    /opt/picochess/gamesdb/tcscid
+COPY    --from=COMPILE /compile/scidvspc/tcscid    /opt/picochess/gamesdb/tcscid
 
 # Copy the compiled tcscid program from the earlier stage
-COPY    --from=BUILD_DGTPICOM_AND_SCIDVSPC /compile/obooksrv/obooksrv  /opt/picochess/obooksrv/
+COPY    --from=COMPILE /compile/obooksrv/obooksrv  /opt/picochess/obooksrv/
 
 # Copy the rest of the repo
 COPY    . .
@@ -65,5 +67,7 @@ RUN     sed -i "s/import collections/import collections.abc/g"                  
 RUN     sed -i "s/collections.MutableMapping/collections.abc.MutableMapping/g"                                       /opt/picochess/.venv/lib/python3.11/site-packages/tornado/httputil.py
 RUN     sed -i "s/import collections/import collections.abc/g"                                                       /opt/picochess/.venv/lib/python3.11/site-packages/tornado/httputil.py
 
+WORKDIR /opt/picochess/obooksrv
+RUN     ln -s testdata/opening.data .
 
 ENTRYPOINT [ "bash", "-c", "/entrypoint.sh" ]
