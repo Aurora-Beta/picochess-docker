@@ -19,6 +19,7 @@ import platform
 import configparser
 import os
 from uci.engine import UciShell, UciEngine
+from chess.uci  import EngineTerminatedException
 
 
 def write_engine_ini(engine_path=None):
@@ -100,44 +101,49 @@ def write_engine_ini(engine_path=None):
     config = configparser.ConfigParser()
     config.optionxform = str
     uci_shell = UciShell()
+    print(f"Checking for executable engines now ...")
     for engine_file_name in engine_list:
         if is_exe(engine_path + os.sep + engine_file_name):
-            engine = UciEngine(file=engine_path + os.sep + engine_file_name, uci_shell=uci_shell)
-            if engine:
-                print(engine_file_name)
-                try:
-                    if engine.has_levels():
-                        write_level_ini(engine_file_name)
-                    engine_name = engine.get_name()
+            try:
+                engine = UciEngine(file=engine_path + os.sep + engine_file_name, uci_shell=uci_shell, mame_par="")
+                if engine:
+                    print(f"-> Found UCI engine '{engine_file_name}'.")
+                    try:
+                        if engine.has_levels():
+                            write_level_ini(engine_file_name)
+                        engine_name = engine.get_name()
 
-                    name_parts = engine_name.replace('.', '').split(' ')
-                    name_small = name_build(name_parts, 6, engine_file_name[2:])
-                    name_medium = name_build(name_parts, 8, name_small)
-                    name_large = name_build(name_parts, 11, name_medium)
+                        name_parts = engine_name.replace('.', '').split(' ')
+                        name_small = name_build(name_parts, 6, engine_file_name[2:])
+                        name_medium = name_build(name_parts, 8, name_small)
+                        name_large = name_build(name_parts, 11, name_medium)
 
-                    config[engine_file_name] = {}
+                        config[engine_file_name] = {}
 
-                    # config[engine_file_name][';available options'] = 'itsDefaultValue'
-                    engine_options = engine.get_options()
-                    for option in engine_options:
-                        config[engine_file_name][str(';' + option)] = str(engine_options[option].default)
+                        # config[engine_file_name][';available options'] = 'itsDefaultValue'
+                        engine_options = engine.get_options()
+                        for option in engine_options:
+                            config[engine_file_name][str(';' + option)] = str(engine_options[option].default)
 
-                    comp_elo = 2500
-                    engine_elo = {'stockfish': 3360, 'texel': 3050, 'rodent': 2920,
-                                  'zurichess': 2790, 'wyld': 2630, 'sayuri': 1850}
-                    for name, elo in engine_elo.items():
-                        if engine_name.lower().startswith(name):
-                            comp_elo = elo
-                            break
+                        comp_elo = 2500
+                        engine_elo = {'stockfish': 3360, 'texel': 3050, 'rodent': 2920,
+                                    'zurichess': 2790, 'wyld': 2630, 'sayuri': 1850}
+                        for name, elo in engine_elo.items():
+                            if engine_name.lower().startswith(name):
+                                comp_elo = elo
+                                break
 
-                    config[engine_file_name]['name'] = engine_name
-                    config[engine_file_name]['small'] = name_small
-                    config[engine_file_name]['medium'] = name_medium
-                    config[engine_file_name]['large'] = name_large
-                    config[engine_file_name]['elo'] = str(comp_elo)
+                        config[engine_file_name]['name'] = engine_name
+                        config[engine_file_name]['small'] = name_small
+                        config[engine_file_name]['medium'] = name_medium
+                        config[engine_file_name]['large'] = name_large
+                        config[engine_file_name]['elo'] = str(comp_elo)
 
-                except AttributeError:
-                    pass
-                engine.quit()
+                    except AttributeError:
+                        pass
+                    engine.quit()
+            except EngineTerminatedException:
+                pass
+
     with open(engine_path + os.sep + 'engines.ini', 'w') as configfile:
         config.write(configfile)
