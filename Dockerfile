@@ -1,7 +1,7 @@
 # BUILD DGTPICOM
 FROM    debian:bookworm AS COMPILE
 
-RUN     apt update && apt install -y build-essential tk-dev tcl-dev cmake git
+RUN     apt update && apt install -y build-essential tk8.6-dev tcl8.6-dev cmake git
 
 # Build dgtpi
 WORKDIR /compile/dgtpi
@@ -11,7 +11,7 @@ RUN     make
 # Build tcscid
 WORKDIR /compile/scidvspc
 COPY    scidvspc    .
-RUN     ./configure && make
+RUN     ./configure TCL_INCLUDE="-I/usr/include/tcl8.6" TCL_VERSION="8.6" && make
 
 # Build obooksrv
 WORKDIR /compile/obooksrv
