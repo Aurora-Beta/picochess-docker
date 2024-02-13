@@ -1,7 +1,8 @@
 # BUILD DGTPICOM
 FROM    debian:bookworm AS COMPILE
 
-RUN     apt update && apt install -y build-essential tk8.6-dev tcl8.6-dev cmake git
+RUN     apt update \
+     && apt install -y build-essential tk-dev tcl-dev tk tcl cmake git
 
 # Build dgtpi
 WORKDIR /compile/dgtpi

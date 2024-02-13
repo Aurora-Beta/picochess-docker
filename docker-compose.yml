@@ -7,3 +7,4 @@ services:
     privileged: true
     volumes:
       - ./picochess.ini:/config/picochess.ini
+      - ./logs:/opt/picochess/logs
