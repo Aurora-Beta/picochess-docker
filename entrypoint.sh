@@ -51,15 +51,15 @@ echo "-> Starting GamesDatabase gamesdb..."
 cd $PICOCHESS_DIR/gamesdb
 ./tcscid get_games.tcl --server 7778&
 
-echo "-> Starting Openingbook Server obooksrv..."
+echo "-> Starting Openingbook Server..."
 # Start Openingbook Server
-cd $PICOCHESS_DIR/obooksrv/
-./obooksrv&
+cd $PICOCHESS_DIR/openingbookserver
+python3 obooksrv.py --host 0.0.0.0 --port 7777 --book opening.data&
 
 echo "-> Starting DGT-Communcation service dgtpi..."
 # Start dgtpi Service
-cd $PICOCHESS_DIR/etc
-./dgtpicom "  DGT  P|  " 1
+# cd $PICOCHESS_DIR/etc
+# ./dgtpicom "  DGT  P|  " 1
 
 echo "-> Starting picochess in foreground now."
 echo "-> To stop this container, press key combination <CTRL>+<c>"

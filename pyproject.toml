@@ -21,6 +21,7 @@ tornado = "4.5.1"
 configobj = "5.0.8"
 geopy = "2.3.0"
 astral = "3.2"
+bottle = "0.12.25"
 
 
 [build-system]
