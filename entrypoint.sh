@@ -46,15 +46,10 @@ if [ ! -f logs/picochess.log ]; then
     touch logs/picochess.log
 fi
 
-echo "-> Starting GamesDatabase gamesdb..."
-# Start gamesdb
-cd $PICOCHESS_DIR/gamesdb
-./tcscid get_games.tcl --server 7778&
-
 echo "-> Starting Openingbook Server..."
 # Start Openingbook Server
-cd $PICOCHESS_DIR/openingbookserver
-python3 obooksrv.py --host 0.0.0.0 --port 7777 --book opening.data&
+cd $PICOCHESS_DIR/dbsrv
+python3 dbsrv.py --host "0.0.0.0" --port 7777 --book opening.data --database games.pgn.xz --indexfolder .&
 
 echo "-> Starting DGT-Communcation service dgtpi..."
 # Start dgtpi Service

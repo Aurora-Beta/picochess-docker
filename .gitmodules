@@ -1,6 +1,3 @@
 [submodule "dgtpi"]
 	path = dgtpi
 	url = https://github.com/lucasvdp/dgtpi.git
-[submodule "scidvspc"]
-	path = scidvspc
-	url = https://github.com/madnight/scidvspc.git

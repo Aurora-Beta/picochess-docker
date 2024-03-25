@@ -2,21 +2,17 @@
 FROM    debian:bookworm AS COMPILE
 
 RUN     apt update \
-     && apt install -y build-essential tk-dev tcl-dev tk tcl cmake git
+     && apt install -y build-essential
 
 # Build dgtpi
 WORKDIR /compile/dgtpi
 COPY    dgtpi    .
 RUN     make
 
-# Build tcscid
-WORKDIR /compile/scidvspc
-COPY    scidvspc    .
-RUN     ./configure TCL_INCLUDE="-I/usr/include/tcl8.6" TCL_VERSION="8.6" && make
-
 #
 # PICOCHESS IMAGE
 #
+
 FROM    debian:bookworm
 
 WORKDIR /tmp
@@ -24,7 +20,7 @@ WORKDIR /tmp
 RUN     apt update
 RUN     apt install -y \
         git sox unzip wget python3-poetry python-is-python3 \
-        libtcl8.6 telnet libglib2.0-dev stockfish \
+        telnet libglib2.0-dev stockfish \
         sudo bluez bluetooth procps libcap2-bin rfkill
 
 # Setup the virtual environment by poetry
@@ -40,9 +36,6 @@ ENV     VIRTUAL_ENV    /opt/picochess/.venv
 # Copy the compiled dgtpip program from the earlier stage
 COPY    --from=COMPILE /compile/dgtpi/dgtpicom     /opt/picochess/etc/dgtpicom
 COPY    --from=COMPILE /compile/dgtpi/dgtpicom.so  /opt/picochess/etc/dgtpicom.so
-
-# Copy the compiled tcscid program from the earlier stage
-COPY    --from=COMPILE /compile/scidvspc/tcscid    /opt/picochess/gamesdb/tcscid
 
 # Copy the rest of the repo
 COPY    . .

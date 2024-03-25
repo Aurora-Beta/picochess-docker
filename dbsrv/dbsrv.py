@@ -1,17 +1,29 @@
+#################################################
+# Programmed in 2024 by github.com/Aurora-Beta  #
+# No copyright usage intended, use as you like! #
+#################################################
+
+# public modules
 import argparse
 import bottle
-import chess
-import chess.polyglot
 import json
-
 from bottle import request  as bt_request
 from bottle import response as bt_response
 from pathlib import Path
 
+# local modules
+import chess
+import chess.polyglot
+import chess.pgn
+import gamesdb
 
-def chessbook_lookup(given_fen):
+#
+# Functions
+#
+
+def openingbook_lookup(given_fen: str) -> list:
+    """Returns a list of dicts of possible moves for given FEN"""
     target_list = list()
-
     board = chess.Board(fen=given_fen)
 
     with chess.polyglot.open_reader(args.book) as reader:
@@ -27,6 +39,7 @@ def chessbook_lookup(given_fen):
             )
 
     return target_list
+
 
 if __name__ == "__main__":
 
@@ -57,11 +70,30 @@ if __name__ == "__main__":
         help="File path to the opening book in polyglot format to be used."
     )
 
+    argument_parser.add_argument(
+        "--database",
+        type=str,
+        required=False,
+        default="games.pgn.xz",
+        help="File path to the games database in PGN format"
+    )
+
+    argument_parser.add_argument(
+        "--indexfolder",
+        type=str,
+        required=False,
+        default=".",
+        help="Folder path containing the files index.w.csv.gz and index.b.csv.gz"
+    )
+
     args = argument_parser.parse_args()
 
-    if not Path(args.book).exists():
-        print(f"File '{args.book}' does not exist!")
-        exit(-1)
+    for filename in [args.book, args.database, args.indexfolder]:
+        if not Path(filename).exists():
+            print(f"File or Folder '{filename}' does not exist!")
+            exit(-1)
+
+    gamesdb_obj = gamesdb.gamesdb(args.database, args.indexfolder)
 
     #
     # Bottle as HTTP-Server and Framework
@@ -94,7 +126,11 @@ if __name__ == "__main__":
         provided_fen = bt_request.query.fen
 
         if action == "get_book_moves" and provided_fen:
-            result = chessbook_lookup(provided_fen)
+            result = openingbook_lookup(provided_fen)
+            return json.dumps({"data": result})
+
+        elif action == "get_games" and provided_fen:
+            result = gamesdb_obj.lookup_games_by_fen(provided_fen)
             return json.dumps({"data": result})
 
         else:
